@@ -1,0 +1,514 @@
+
+Traceback (most recent call last):
+  File "c:\Users\lenovo\Desktop\Self Learning\Web dev\Stage CASA\Real_App\main.py", line 52, in <module>
+    create_main_layout()
+  File "c:\Users\lenovo\Desktop\Self Learning\Web dev\Stage CASA\Real_App\main.py", line 40, in create_main_layout
+    create_billet_page(app_state)
+  File "c:\Users\lenovo\Desktop\Self Learning\Web dev\Stage CASA\Real_App\pages\billet_page.py", line 31, in create_billet_page
+    add_billet_button = ui.button(
+                        ^^^^^^^^^^
+TypeError: Button.init() got an unexpected keyword argument 'disabled'
+
+info dump :
+
+Installation
+Features
+Demos
+Documentation
+Examples
+Why?
+← back
+
+ui.button
+
+Button
+Icons
+Await button click
+Disable button with a context manager
+Custom toggle button
+Floating Action Button
+Expandable Floating Action Button
+Reference
+Initializer
+Properties
+Methods
+Inheritance
+ui.button
+
+Button
+This element is based on Quasar's QBtn component.
+
+The color parameter accepts a Quasar color, a Tailwind color, or a CSS color. If a Quasar color is used, the button will be styled according to the Quasar theme including the color of the text. Note that there are colors like "red" being both a Quasar color and a CSS color. In such cases the Quasar color will be used.
+
+text:	the label of the button
+on_click:	callback which is invoked when button is pressed
+color:	the color of the button (either a Quasar, Tailwind, or CSS color or None, default: 'primary')
+icon:	the name of an icon to be displayed on the button (default: None)
+main.py
+from nicegui import ui
+
+ui.button('Click me!', on_click=lambda: ui.notify('You clicked me!'))
+
+ui.run()
+NiceGUI
+Icons
+You can also add an icon to a button.
+
+main.py
+from nicegui import ui
+
+with ui.row():
+    ui.button('demo', icon='history')
+    ui.button(icon='thumb_up')
+    with ui.button():
+        ui.label('sub-elements')
+        ui.image('https://picsum.photos/id/377/640/360') \
+            .classes('rounded-full w-16 h-16 ml-4')
+
+ui.run()
+NiceGUI
+Await button click
+Sometimes it is convenient to wait for a button click before continuing the execution.
+
+main.py
+from nicegui import ui
+
+@ui.page('/')
+async def index():
+    b = ui.button('Step')
+    await b.clicked()
+    ui.label('One')
+    await b.clicked()
+    ui.label('Two')
+    await b.clicked()
+    ui.label('Three')
+
+ui.run()
+NiceGUI
+Disable button with a context manager
+This showcases a context manager that can be used to disable a button for the duration of an async process.
+
+main.py
+import httpx
+from contextlib import contextmanager
+from nicegui import ui
+
+@contextmanager
+def disable(button: ui.button):
+    button.disable()
+    try:
+        yield
+    finally:
+        button.enable()
+
+async def get_slow_response(button: ui.button) -> None:
+    with disable(button):
+        async with httpx.AsyncClient() as client:
+            response = await client.get('https://httpbin.org/delay/1', timeout=5)
+            ui.notify(f'Response code: {response.status_code}')
+
+ui.button('Get slow response', on_click=lambda e: get_slow_response(e.sender))
+
+ui.run()
+NiceGUI
+Custom toggle button
+As with all other elements, you can implement your own subclass with specialized logic. Like this red/green toggle button with an internal boolean state.
+
+main.py
+from nicegui import ui
+
+class ToggleButton(ui.button):
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._state = False
+        self.on('click', self.toggle)
+
+    def toggle(self) -> None:
+        """Toggle the button state."""
+        self._state = not self._state
+        self.update()
+
+    def update(self) -> None:
+        self.props(f'color={"green" if self._state else "red"}')
+        super().update()
+
+ToggleButton('Toggle me')
+
+ui.run()
+NiceGUI
+Floating Action Button
+As described in the Quasar documentation, a Floating Action Button (FAB) is simply a "page-sticky" with a button inside. With the "fab" prop, the button will be rounded and gets a shadow. Color can be freely chosen, but most often it is an accent color.
+
+main.py
+from nicegui import ui
+
+ui.colors(accent='#6AD4DD')
+with ui.page_sticky(x_offset=18, y_offset=18):
+    ui.button(icon='home', on_click=lambda: ui.notify('home')) \
+        .props('fab color=accent')
+
+ui.run()
+NiceGUI
+Expandable Floating Action Button
+The Quasar FAB (q-fab), is a button that reveals multiple actions when clicked. While it is not a separate element in NiceGUI, it can be easily created using the generic ui.element.
+
+main.py
+from nicegui import ui
+
+with ui.element('q-fab').props('icon=navigation color=green'):
+    ui.element('q-fab-action').props('icon=train color=green-5') \
+        .on('click', lambda: ui.notify('train'))
+    ui.element('q-fab-action').props('icon=sailing color=green-5') \
+        .on('click', lambda: ui.notify('boat'))
+    ui.element('q-fab-action').props('icon=rocket color=green-5') \
+        .on('click', lambda: ui.notify('rocket'))
+
+ui.run()
+NiceGUI
+Reference
+Initializer
+text:	the label of the button
+on_click:	callback which is invoked when button is pressed
+color:	the color of the button (either a Quasar, Tailwind, or CSS color or None, default: 'primary')
+icon:	the name of an icon to be displayed on the button (default: None)
+Properties
+classes: 'Classes[Self]'
+
+The classes of the element.
+
+enabled: BindableProperty
+
+icon: BindableProperty
+
+is_deleted: 'bool'
+
+Whether the element has been deleted.
+
+is_ignoring_events: bool
+
+Return whether the element is currently ignoring events.
+
+props: 'Props[Self]'
+
+The props of the element.
+
+style: 'Style[Self]'
+
+The style of the element.
+
+text: BindableProperty
+
+visible: BindableProperty
+
+Methods
+add_resource(path: Union[str, Path]) -> None
+
+Add a resource to the element.
+
+param path:	path to the resource (e.g. folder with CSS and JavaScript files)
+add_slot(name: str, template: Optional[str] = None) -> Slot
+
+Add a slot to the element.
+
+NiceGUI is using the slot concept from Vue: Elements can have multiple slots, each possibly with a number of children. Most elements only have one slot, e.g. a ui.card (QCard) only has a default slot. But more complex elements like ui.table (QTable) can have more slots like "header", "body" and so on. If you nest NiceGUI elements via with ui.row(): ... you place new elements inside of the row's default slot. But if you use with table.add_slot(...): ..., you enter a different slot.
+
+The slot stack helps NiceGUI to keep track of which slot is currently used for new elements. The parent field holds a reference to its element. Whenever an element is entered via a with expression, its default slot is automatically entered as well.
+
+param name:	name of the slot
+param template:	Vue template of the slot
+return:	the slot
+ancestors(include_self: bool = False) -> Iterator[Element]
+
+Iterate over the ancestors of the element.
+
+param include_self:
+ 	whether to include the element itself in the iteration
+bind_enabled(target_object: Any, target_name: str = 'enabled', forward: Callable[..., Any] = [...], backward: Callable[..., Any] = [...]) -> Self
+
+Bind the enabled state of this element to the target object's target_name property.
+
+The binding works both ways, from this element to the target and from the target to this element. The update happens immediately and whenever a value changes. The backward binding takes precedence for the initial synchronization.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+param backward:	A function to apply to the value before applying it to this element.
+bind_enabled_from(target_object: Any, target_name: str = 'enabled', backward: Callable[..., Any] = [...]) -> Self
+
+Bind the enabled state of this element from the target object's target_name property.
+
+The binding works one way only, from the target to this element. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind from.
+param target_name:
+ 	The name of the property to bind from.
+param backward:	A function to apply to the value before applying it to this element.
+bind_enabled_to(target_object: Any, target_name: str = 'enabled', forward: Callable[..., Any] = [...]) -> Self
+
+Bind the enabled state of this element to the target object's target_name property.
+
+The binding works one way only, from this element to the target. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+bind_icon(target_object: Any, target_name: str = 'icon', forward: Callable[..., Any] = [...], backward: Callable[..., Any] = [...]) -> Self
+
+Bind the icon of this element to the target object's target_name property.
+
+The binding works both ways, from this element to the target and from the target to this element. The update happens immediately and whenever a value changes. The backward binding takes precedence for the initial synchronization.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+param backward:	A function to apply to the value before applying it to this element.
+bind_icon_from(target_object: Any, target_name: str = 'icon', backward: Callable[..., Any] = [...]) -> Self
+
+Bind the icon of this element from the target object's target_name property.
+
+The binding works one way only, from the target to this element. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind from.
+param target_name:
+ 	The name of the property to bind from.
+param backward:	A function to apply to the value before applying it to this element.
+bind_icon_to(target_object: Any, target_name: str = 'icon', forward: Callable[..., Any] = [...]) -> Self
+
+Bind the icon of this element to the target object's target_name property.
+
+The binding works one way only, from this element to the target. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+bind_text(target_object: Any, target_name: str = 'text', forward: Callable[..., Any] = [...], backward: Callable[..., Any] = [...]) -> Self
+
+Bind the text of this element to the target object's target_name property.
+
+The binding works both ways, from this element to the target and from the target to this element. The update happens immediately and whenever a value changes. The backward binding takes precedence for the initial synchronization.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+param backward:	A function to apply to the value before applying it to this element.
+bind_text_from(target_object: Any, target_name: str = 'text', backward: Callable[..., Any] = [...]) -> Self
+
+Bind the text of this element from the target object's target_name property.
+
+The binding works one way only, from the target to this element. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind from.
+param target_name:
+ 	The name of the property to bind from.
+param backward:	A function to apply to the value before applying it to this element.
+bind_text_to(target_object: Any, target_name: str = 'text', forward: Callable[..., Any] = [...]) -> Self
+
+Bind the text of this element to the target object's target_name property.
+
+The binding works one way only, from this element to the target. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+bind_visibility(target_object: Any, target_name: str = 'visible', forward: Callable[..., Any] = [...], backward: Callable[..., Any] = [...], value: Any = None) -> Self
+
+Bind the visibility of this element to the target object's target_name property.
+
+The binding works both ways, from this element to the target and from the target to this element. The update happens immediately and whenever a value changes. The backward binding takes precedence for the initial synchronization.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+param backward:	A function to apply to the value before applying it to this element.
+param value:	If specified, the element will be visible only when the target value is equal to this value.
+bind_visibility_from(target_object: Any, target_name: str = 'visible', backward: Callable[..., Any] = [...], value: Any = None) -> Self
+
+Bind the visibility of this element from the target object's target_name property.
+
+The binding works one way only, from the target to this element. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind from.
+param target_name:
+ 	The name of the property to bind from.
+param backward:	A function to apply to the value before applying it to this element.
+param value:	If specified, the element will be visible only when the target value is equal to this value.
+bind_visibility_to(target_object: Any, target_name: str = 'visible', forward: Callable[..., Any] = [...]) -> Self
+
+Bind the visibility of this element to the target object's target_name property.
+
+The binding works one way only, from this element to the target. The update happens immediately and whenever a value changes.
+
+param target_object:
+ 	The object to bind to.
+param target_name:
+ 	The name of the property to bind to.
+param forward:	A function to apply to the value before applying it to the target.
+clear() -> None
+
+Remove all child elements.
+
+clicked() -> None
+
+Wait until the button is clicked.
+
+default_classes(add: Optional[str] = None, remove: Optional[str] = None, toggle: Optional[str] = None, replace: Optional[str] = None) -> type[Self]
+
+Apply, remove, toggle, or replace default HTML classes.
+
+This allows modifying the look of the element or its layout using Tailwind or Quasar classes.
+
+Removing or replacing classes can be helpful if predefined classes are not desired. All elements of this class will share these HTML classes. These must be defined before element instantiation.
+
+param add:	whitespace-delimited string of classes
+param remove:	whitespace-delimited string of classes to remove from the element
+param toggle:	whitespace-delimited string of classes to toggle (added in version 2.7.0)
+param replace:	whitespace-delimited string of classes to use instead of existing ones
+default_props(add: Optional[str] = None, remove: Optional[str] = None) -> type[Self]
+
+Add or remove default props.
+
+This allows modifying the look of the element or its layout using Quasar props. Since props are simply applied as HTML attributes, they can be used with any HTML element. All elements of this class will share these props. These must be defined before element instantiation.
+
+Boolean properties are assumed True if no value is specified.
+
+param add:	whitespace-delimited list of either boolean values or key=value pair to add
+param remove:	whitespace-delimited list of property keys to remove
+default_style(add: Optional[str] = None, remove: Optional[str] = None, replace: Optional[str] = None) -> type[Self]
+
+Apply, remove, or replace default CSS definitions.
+
+Removing or replacing styles can be helpful if the predefined style is not desired. All elements of this class will share these CSS definitions. These must be defined before element instantiation.
+
+param add:	semicolon-separated list of styles to add to the element
+param remove:	semicolon-separated list of styles to remove from the element
+param replace:	semicolon-separated list of styles to use instead of existing ones
+delete() -> None
+
+Delete the element and all its children.
+
+descendants(include_self: bool = False) -> Iterator[Element]
+
+Iterate over the descendants of the element.
+
+param include_self:
+ 	whether to include the element itself in the iteration
+disable() -> None
+
+Disable the element.
+
+enable() -> None
+
+Enable the element.
+
+get_computed_prop(prop_name: str, timeout: float = 1) -> AwaitableResponse
+
+Return a computed property.
+
+This function should be awaited so that the computed property is properly returned.
+
+param prop_name:
+ 	name of the computed prop
+param timeout:	maximum time to wait for a response (default: 1 second)
+mark(*markers: str) -> Self
+
+Replace markers of the element.
+
+Markers are used to identify elements for querying with ElementFilter which is heavily used in testing but can also be used to reduce the number of global variables or passing around dependencies.
+
+param markers:	list of strings or single string with whitespace-delimited markers; replaces existing markers
+move(target_container: Optional[Element] = None, target_index: int = -1, target_slot: Optional[str] = None) -> None
+
+Move the element to another container.
+
+param target_container:
+ 	container to move the element to (default: the parent container)
+param target_index:
+ 	index within the target slot (default: append to the end)
+param target_slot:
+ 	slot within the target container (default: default slot)
+on(type: str, handler: Optional[events.Handler[events.GenericEventArguments]] = None, args: Union[None, Sequence[str], Sequence[Optional[Sequence[str]]]] = None, throttle: float = 0.0, leading_events: bool = True, trailing_events: bool = True, js_handler: Optional[str] = None) -> Self
+
+Subscribe to an event.
+
+param type:	name of the event (e.g. "click", "mousedown", or "update:model-value")
+param handler:	callback that is called upon occurrence of the event
+param args:	arguments included in the event message sent to the event handler (default: None meaning all)
+param throttle:	minimum time (in seconds) between event occurrences (default: 0.0)
+param leading_events:
+ 	whether to trigger the event handler immediately upon the first event occurrence (default: True)
+param trailing_events:
+ 	whether to trigger the event handler after the last event occurrence (default: True)
+param js_handler:
+ 	JavaScript code that is executed upon occurrence of the event, e.g. (evt) => alert(evt) (default: None)
+on_click(callback: Union[Callable[[nicegui.events.ClickEventArguments], Any], Callable[[], Any]]) -> Self
+
+Add a callback to be invoked when the button is clicked.
+
+remove(element: Union[Element, int]) -> None
+
+Remove a child element.
+
+param element:	either the element instance or its ID
+run_method(name: str, *args: Any, timeout: float = 1) -> AwaitableResponse
+
+Run a method on the client side.
+
+If the function is awaited, the result of the method call is returned. Otherwise, the method is executed without waiting for a response.
+
+param name:	name of the method
+param args:	arguments to pass to the method
+param timeout:	maximum time to wait for a response (default: 1 second)
+set_enabled(value: bool) -> None
+
+Set the enabled state of the element.
+
+set_icon(icon: Optional[str]) -> None
+
+Set the icon of this element.
+
+param icon:	The new icon.
+set_text(text: str) -> None
+
+Set the text of this element.
+
+param text:	The new text.
+set_visibility(visible: bool) -> None
+
+Set the visibility of this element.
+
+param visible:	Whether the element should be visible.
+tooltip(text: str) -> Self
+
+Add a tooltip to the element.
+
+param text:	text of the tooltip
+update() -> None
+
+Update the element on the client side.
+
+Inheritance
+IconElement
+TextElement
+DisableableElement
+BackgroundColorElement
+Element
+Visibility
